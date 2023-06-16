@@ -1,8 +1,9 @@
 const express = require("express");
-const accountRoutes = require("./src/controller/routes");
 const app = express();
+const bodyParser = require("body-parser");
 
-app.use(express.json());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
   return res.send({
@@ -12,7 +13,9 @@ app.get("/", (req, res) => {
   });
 });
 
-app.use("/api/v1/accounts", accountRoutes);
+const userRouter = require("./src/controller/users");
+
+app.use("/api/users", userRouter);
 
 app.listen(3000, () => {
   console.log("Sever is now listening at port 3000");

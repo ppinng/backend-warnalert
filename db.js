@@ -1,13 +1,3 @@
-// const { Pool } = require("pg");
-
-// const pool = new Pool({
-//   user: "ppinng",
-//   host: "warnalert-db-4998.8nk.cockroachlabs.cloud",
-//   database: "defaultdb",
-//   password: process.env.PASSWORD,
-//   port: "26257",
-// });
-
 const { Client } = require("pg");
 require("dotenv").config();
 const client = new Client({
