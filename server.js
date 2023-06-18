@@ -16,10 +16,12 @@ app.get("/", (req, res) => {
 const userRouter = require("./src/controller/users");
 const registerRouter = require("./src/controller/auth/register");
 const loginRouter = require("./src/controller/auth/login");
+const pinRouter = require("./src/controller/pins");
 
 app.use("/api/users", userRouter);
 app.use("/api/auth/register", registerRouter);
 app.use("/api/auth/login", loginRouter);
+app.use("/api/pins", pinRouter);
 
 app.listen(3000, () => {
   console.log("Sever is now listening at port 3000");
