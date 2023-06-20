@@ -2,6 +2,7 @@ const pool = require("../../../db");
 const express = require("express");
 const bcrypt = require("bcrypt");
 const router = express.Router();
+const jwt = require("jsonwebtoken");
 
 // Login
 router.post("/", async (req, res) => {
@@ -23,18 +24,24 @@ router.post("/", async (req, res) => {
     const passwordMatch = await bcrypt.compare(pass, user.pass);
 
     if (passwordMatch) {
+      //Create and assign token
+      const token = jwt.sign(
+        { user_id: user.user_id },
+        process.env.TOKEN_SECRET
+      );
+
       // Passwords match, user is authenticated
-      return res.send({ message: "Login successful" });
+      res.status(200).json({
+        status: true,
+        token: token,
+        message: "Login Sucessful",
+      });
     } else {
       // Passwords don't match
       return res.status(401).send({ error: "Invalid username or password" });
     }
   } catch (error) {
-    console.error(error);
-    return res.status(500).send({
-      error: true,
-      message: "An error occurred while processing the request",
-    });
+    throw error;
   }
 });
 
