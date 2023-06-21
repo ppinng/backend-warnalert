@@ -15,7 +15,7 @@ router.post("/", async (req, res) => {
 
     if (result.rows.length === 0) {
       // User not found
-      return res.status(401).send({ error: "Invalid username or password" });
+      return res.status(401).send({ error: true, message: "User not found" });
     }
 
     const user = result.rows[0];
@@ -26,9 +26,12 @@ router.post("/", async (req, res) => {
     if (passwordMatch) {
       //Create and assign token
       const token = jwt.sign(
-        { user_id: user.user_id },
+        { user_id: user.user_id, username },
         process.env.TOKEN_SECRET
       );
+
+      //save token
+      user.token = token;
 
       // Passwords match, user is authenticated
       res.status(200).json({
@@ -38,7 +41,9 @@ router.post("/", async (req, res) => {
       });
     } else {
       // Passwords don't match
-      return res.status(401).send({ error: "Invalid username or password" });
+      return res
+        .status(401)
+        .send({ error: true, message: "Invalid username or password" });
     }
   } catch (error) {
     throw error;
