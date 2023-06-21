@@ -1,40 +1,39 @@
 const pool = require("../../db");
 const express = require("express");
+const verifyToken = require("./auth/verifytoken");
 const router = express.Router();
-const bcrypt = require("bcrypt");
 
 
-// Create a new post
-router.post("/", (req, res) => {
-    const { pin_id, user_id, post_detail, post_image } = req.body;
-
-    if (!pin_id || !user_id || !post_detail || !post_image) {
-        return res.status(400).json({
-            error: true,
-            message: "Please provide pin_id, user_id, post_detail, and post_image.",
-        });
-    }
-
-    const query =
-        "INSERT INTO posts (pin_id, user_id, post_detail, post_image, posted_at) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP) RETURNING *";
-    const values = [pin_id, user_id, post_detail, post_image];
-
-    pool.query(query, values, (error, results) => {
-        if (error) {
-            console.error("Error creating post:", error);
-            return res.status(500).json({
-                error: true,
-                message: "An error occurred while creating the post.",
-            });
-        }
-
-        return res.json({
+//Create new post
+router.post("/", verifyToken, (req, res) => {
+    let user_id = req.user.user_id;
+    let pin_id = req.body.pin_id;
+    let post_detail = req.body.post_detail;
+    let post_image = req.body.post_image;
+  
+    if (!post_detail || !post_image || !pin_id) {
+      return res.status(400).send({
+        error: true,
+        message: "Please provide post_detail, post_image, and pin_id.",
+      });
+    } else {
+      pool.query(
+        "INSERT INTO Posts(pin_id, user_id, post_detail, post_image, posted_at) VALUES($1, $2, $3, $4, NOW() AT TIME ZONE 'Asia/Bangkok')",
+        [pin_id, user_id, post_detail, post_image],
+        (error, results) => {
+          if (error) {
+            throw error;
+          }
+  
+          return res.send({
             error: false,
-            data: results.rows[0],
-            message: "Post successfully added.",
-        });
-    });
-});
+            data: results.rows,
+            message: "Pin successfully added",
+          });
+        }
+      );
+    }
+  });
 
 // Retrieve all posts
 router.get("/", (req, res) => {
@@ -79,7 +78,7 @@ router.get("/:pin_id", (req, res) => {
     });
 });
 
-// Delete a post by post_id
+// Delete a post by post_idHomes
 router.delete("/:post_id", (req, res) => {
     const postId = req.params.post_id;
     const query = "DELETE FROM posts WHERE post_id = $1 RETURNING *";
