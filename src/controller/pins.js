@@ -3,7 +3,7 @@ const express = require("express");
 const verifyToken = require("./auth/verifytoken");
 const router = express.Router();
 
-//Post pins
+// Post pins
 router.post("/", verifyToken, (req, res) => {
   let user_id = req.user.user_id;
   let location_name = req.body.location_name;
@@ -17,23 +17,24 @@ router.post("/", verifyToken, (req, res) => {
     });
   } else {
     pool.query(
-      "INSERT INTO Pins(user_id, location_name, latitude, longitude) VALUES($1, $2, $3, $4)",
+      "INSERT INTO Pins(user_id, location_name, latitude, longitude) VALUES($1, $2, $3, $4) RETURNING *", // Add RETURNING * to retrieve the inserted row
       [user_id, location_name, latitude, longitude],
       (error, results) => {
         if (error) {
           throw error;
         }
 
+        const insertedPin = results.rows[0]; // Retrieve the inserted pin from the query results
+
         return res.send({
           error: false,
-          data: results.rows,
+          data: insertedPin,
           message: "Pin successfully added",
         });
       }
     );
   }
 });
-
 // Get all pins
 router.get("/", (req, res) => {
   pool.query("SELECT * FROM Pins", (error, results) => {
