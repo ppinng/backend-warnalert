@@ -17,14 +17,16 @@ const userRouter = require("./src/controller/users");
 const registerRouter = require("./src/controller/auth/register");
 const loginRouter = require("./src/controller/auth/login");
 const pinRouter = require("./src/controller/pins");
-// const checkEmailRouter = require("./src/controller/auth/checkemail");
+const checkEmailRouter = require("./src/controller/auth/checkemail");
+const resetPassRouter = require('./src/controller/auth/resetpass');
 const postRouter = require("./src/controller/posts");
 
 app.use("/api/users", userRouter);
 app.use("/api/auth/register", registerRouter);
 app.use("/api/auth/login", loginRouter);
 app.use("/api/pins", pinRouter);
-// app.use("/api/auth/checkemail", checkEmailRouter);
+app.use("/api/auth/checkemail", checkEmailRouter);
+app.use('/api/auth/reset-password', resetPassRouter)
 app.use("/api/posts", postRouter);
 
 app.listen(3000, () => {
