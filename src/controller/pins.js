@@ -50,29 +50,38 @@ router.get("/", (req, res) => {
   });
 });
 
-// Delete pins by pin_id
 router.delete("/:pin_id", (req, res) => {
   const pinId = req.params.pin_id;
 
   pool.query(
-    "DELETE FROM Pins WHERE pin_id = $1",
+    "DELETE FROM Posts WHERE pin_id = $1",
     [pinId],
     (error, results) => {
       if (error) {
         throw error;
       }
 
-      if (results.rowCount === 0) {
-        return res.status(404).send({
-          error: true,
-          message: "Pin not found",
-        });
-      }
+      pool.query(
+        "DELETE FROM Pins WHERE pin_id = $1",
+        [pinId],
+        (error, results) => {
+          if (error) {
+            throw error;
+          }
 
-      return res.send({
-        error: false,
-        message: "Pin successfully deleted",
-      });
+          if (results.rowCount === 0) {
+            return res.status(404).send({
+              error: true,
+              message: "Pin not found",
+            });
+          }
+
+          return res.send({
+            error: false,
+            message: "Pin and related posts successfully deleted",
+          });
+        }
+      );
     }
   );
 });
