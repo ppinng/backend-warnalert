@@ -17,7 +17,12 @@ router.get("/", (req, res) => {
   array_agg(to_char(Posts.posted_at, 'YYYY-MM-DD HH24:MI:SS')) AS posted_at_formatted,
   array_agg(Users.profile_image) AS profile_images,
   array_agg(
-      now() - Posts.posted_at
+    json_build_object(
+      'days', EXTRACT(DAY FROM now() - Posts.posted_at),
+      'hours', EXTRACT(HOUR FROM now() - Posts.posted_at),
+      'minutes', EXTRACT(MINUTE FROM now() - Posts.posted_at),
+      'weeks', FLOOR(EXTRACT(DAY FROM now() - Posts.posted_at) / 7) -- Calculate weeks based on days
+    )
   ) AS time_ago
 FROM
   Pins
