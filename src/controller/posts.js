@@ -34,33 +34,23 @@ router.post("/", verifyToken, (req, res) => {
       );
     }
   });
-
-// Retrieve all posts
-router.get("/", (req, res) => {
-    const query = "SELECT * FROM posts";
-
-    pool.query(query, (error, results) => {
-        if (error) {
-            console.error("Error retrieving posts:", error);
-            return res.status(500).json({
-                error: true,
-                message: "An error occurred while retrieving posts.",
-            });
-        }
-
-        return res.json({
-            error: false,
-            data: results.rows,
-            message: "Successfully retrieved all posts.",
-        });
-    });
-});
-
 // Retrieve posts by pin ID
 router.get("/:pin_id", (req, res) => {
     const pinId = req.params.pin_id;
-    const query = "SELECT * FROM posts WHERE pin_id = $1";
-
+    const query = `
+    SELECT 
+      post_id, pin_id, user_id, post_detail, post_image,
+      posted_at AT TIME ZONE 'Asia/Bangkok' AS posted_at,
+      CASE
+        WHEN EXTRACT(EPOCH FROM NOW() AT TIME ZONE 'Asia/Bangkok' - posted_at) < 60 THEN 'Just Now'
+        WHEN EXTRACT(EPOCH FROM NOW() AT TIME ZONE 'Asia/Bangkok' - posted_at) < 3600 THEN EXTRACT(MINUTE FROM NOW() AT TIME ZONE 'Asia/Bangkok' - posted_at)::int || ' min ago'
+        WHEN EXTRACT(EPOCH FROM NOW() AT TIME ZONE 'Asia/Bangkok' - posted_at) < 86400 THEN EXTRACT(HOUR FROM NOW() AT TIME ZONE 'Asia/Bangkok' - posted_at)::int || ' hour ago'
+        WHEN EXTRACT(EPOCH FROM NOW() AT TIME ZONE 'Asia/Bangkok' - posted_at) < 604800 THEN EXTRACT(DAY FROM NOW() AT TIME ZONE 'Asia/Bangkok' - posted_at)::int || ' day ago'
+        ELSE (EXTRACT(EPOCH FROM NOW() AT TIME ZONE 'Asia/Bangkok' - posted_at) / 604800)::int || ' week ago'
+      END AS time_ago
+    FROM posts
+    WHERE pin_id = $1
+    ORDER BY posted_at DESC`;
     pool.query(query, [pinId], (error, results) => {
         if (error) {
             console.error("Error retrieving posts by pin ID:", error);
@@ -78,7 +68,7 @@ router.get("/:pin_id", (req, res) => {
     });
 });
 
-// Delete a post by post_idHomes
+// Delete a post by post_id
 router.delete("/:post_id", (req, res) => {
     const postId = req.params.post_id;
     const query = "DELETE FROM posts WHERE post_id = $1 RETURNING *";
@@ -106,4 +96,97 @@ router.delete("/:post_id", (req, res) => {
     });
 });
 
+// Update a post by post_id with new image
+router.put("/:post_id", verifyToken, (req, res) => {
+    const postId = req.params.post_id;
+    const { post_detail, post_image } = req.body;
+  
+    if (!post_detail || !post_image) {
+      return res.status(400).json({
+        error: true,
+        message: "Please provide post_detail and post_image.",
+      });
+    }
+  
+    const query = `
+      UPDATE posts
+      SET post_detail = $1, post_image = $2
+      WHERE post_id = $3
+      RETURNING *
+    `;
+  
+    pool.query(
+      query,
+      [post_detail, post_image, postId],
+      (error, results) => {
+        if (error) {
+          console.error("Error updating post:", error);
+          return res.status(500).json({
+            error: true,
+            message: "An error occurred while updating the post.",
+          });
+        }
+  
+        if (results.rowCount === 0) {
+          return res.status(404).json({
+            error: true,
+            message: "Post not found.",
+          });
+        }
+  
+        return res.json({
+          error: false,
+          data: results.rows[0],
+          message: "Post successfully updated.",
+        });
+      }
+    );
+  });
+
+// Update a post by post_id with out image
+router.put("/:post_id", verifyToken, (req, res) => {
+    const postId = req.params.post_id;
+    const { post_detail } = req.body;
+  
+    if (!post_detail ) {
+      return res.status(400).json({
+        error: true,
+        message: "Please provide post_detail.",
+      });
+    }
+  
+    const query = `
+      UPDATE posts
+      SET post_detail = $1
+      WHERE post_id = $2
+      RETURNING *
+    `;
+  
+    pool.query(
+      query,
+      [post_detail, postId],
+      (error, results) => {
+        if (error) {
+          console.error("Error updating post:", error);
+          return res.status(500).json({
+            error: true,
+            message: "An error occurred while updating the post.",
+          });
+        }
+  
+        if (results.rowCount === 0) {
+          return res.status(404).json({
+            error: true,
+            message: "Post not found.",
+          });
+        }
+  
+        return res.json({
+          error: false,
+          data: results.rows[0],
+          message: "Post successfully updated.",
+        });
+      }
+    );
+  });
 module.exports = router;
