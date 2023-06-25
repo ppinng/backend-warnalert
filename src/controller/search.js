@@ -14,14 +14,14 @@ router.get("/", (req, res) => {
   COUNT(Posts.post_id) AS post_count,
   array_agg(Posts.post_detail) AS post_details,
   array_agg(Posts.post_image) AS post_images,
-  array_agg(to_char(Posts.posted_at, 'YYYY-MM-DD HH24:MI:SS')) AS posted_at_formatted,
+  array_agg(to_char(Posts.posted_at , 'YYYY-MM-DD HH24:MI:SS')) AS posted_at_formatted ,
   array_agg(Users.profile_image) AS profile_images,
   array_agg(
     json_build_object(
-      'days', EXTRACT(DAY FROM now() - Posts.posted_at),
-      'hours', EXTRACT(HOUR FROM now() - Posts.posted_at),
-      'minutes', EXTRACT(MINUTE FROM now() - Posts.posted_at),
-      'weeks', FLOOR(EXTRACT(DAY FROM now() - Posts.posted_at) / 7) -- Calculate weeks based on days
+      'days', EXTRACT(DAY FROM now() AT TIME ZONE 'Asia/Bangkok' - Posts.posted_at),
+      'hours', EXTRACT(HOUR FROM now() AT TIME ZONE 'Asia/Bangkok' - Posts.posted_at),
+      'minutes', EXTRACT(MINUTE FROM now() AT TIME ZONE 'Asia/Bangkok' - Posts.posted_at),
+      'weeks', FLOOR(EXTRACT(DAY FROM now() AT TIME ZONE 'Asia/Bangkok' - Posts.posted_at) / 7) -- Calculate weeks based on days
     )
   ) AS time_ago
 FROM
