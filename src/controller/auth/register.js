@@ -41,9 +41,16 @@ router.post("/", async (req, res) => {
         });
       }
     } else {
+      const DEFAULT_PROFILE_IMAGE =
+        "https://cdn.discordapp.com/attachments/1099962315098558524/1122551709579878531/profile_image.png";
       const insertQuery =
-        "INSERT INTO Users(username, email, pass) VALUES($1, $2, $3)";
-      await pool.query(insertQuery, [username, email, hashedPass]);
+        "INSERT INTO Users(username, email, pass, profile_image) VALUES($1, $2, $3, $4)";
+      await pool.query(insertQuery, [
+        username,
+        email,
+        hashedPass,
+        DEFAULT_PROFILE_IMAGE,
+      ]);
 
       return res.send({
         error: false,
