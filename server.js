@@ -24,7 +24,7 @@ const postRouter = require("./src/controller/posts");
 const searchRouter = require("./src/controller/search");
 // const autocompleteRouter = require("./src/controller/autocomplete");
 const profileRouter = require("./src/controller/get_profile");
-
+const imageRouter = require("./src/controller/get_imageanduser");
 app.use("/api/users", userRouter);
 app.use("/api/auth/register", registerRouter);
 app.use("/api/auth/login", loginRouter);
@@ -37,6 +37,7 @@ app.use("/api/search", searchRouter);
 // app.use("/api/autocomplete", autocompleteRouter);
 app.use("/api/profile", profileRouter);
 
+app.use("/api/imageuser", imageRouter);
 app.listen(3000, () => {
   console.log("Sever is now listening at port 3000");
 });
