@@ -76,4 +76,20 @@ router.put("/:user_id", async (req, res) => {
   }
 });
 
+// PUT update userImage
+router.put("/image/:user_id", async (req, res) => {
+  const user_id = req.params.user_id;
+  const { profile_image } = req.body;
+
+  try {
+    const updateQuery = "UPDATE Users SET profile_image = $1 WHERE user_id = $2";
+    await pool.query(updateQuery, [profile_image, user_id]);
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error updating profile_image:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 module.exports = router;
