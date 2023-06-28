@@ -65,6 +65,12 @@ router.put("/:user_id", async (req, res) => {
   const user_id = req.params.user_id;
   const { username } = req.body;
 
+  if (username.length === 0) {
+    return res
+      .status(400)
+      .json({ error: true, message: "Username cannot be empty" });
+  }
+
   try {
     const updateQuery = "UPDATE Users SET username = $1 WHERE user_id = $2";
     await pool.query(updateQuery, [username, user_id]);
@@ -82,7 +88,8 @@ router.put("/image/:user_id", async (req, res) => {
   const { profile_image } = req.body;
 
   try {
-    const updateQuery = "UPDATE Users SET profile_image = $1 WHERE user_id = $2";
+    const updateQuery =
+      "UPDATE Users SET profile_image = $1 WHERE user_id = $2";
     await pool.query(updateQuery, [profile_image, user_id]);
 
     res.json({ success: true });
